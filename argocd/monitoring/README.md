@@ -11,7 +11,8 @@ argocd/monitoring/
 ├── values.yaml
 └── grafana/
     ├── dashboards/
-    │   └── canary-overview.json
+    │   ├── canary-overview.json
+    │   └── my-api-golden-signals.json
     ├── generate-kustomization.sh
     └── kustomization.yaml
 ```
@@ -111,3 +112,15 @@ kubectl port-forward \
 ```
 
 Depois acesse `http://localhost:9090/targets` e procure por `serviceMonitor/monitoring/my-api`.
+
+O dashboard provisionado **my-api / Golden Signals** usa as métricas do
+Micrometer e do Kubernetes para exibir:
+
+- tráfego total e por versão/cor;
+- latência p50, p95 e p99;
+- taxa de respostas 5xx e erros por status;
+- saturação de CPU e memória por Pod.
+
+Os endpoints `/actuator/*` são excluídos dos painéis HTTP para que o scrape do
+Prometheus não seja contabilizado como tráfego da aplicação. Use os filtros de
+versão e cor para comparar stable e canary durante um rollout.

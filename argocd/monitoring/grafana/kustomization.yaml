@@ -12,3 +12,4 @@ configMapGenerator:
   - name: grafana-custom-dashboards
     files:
       - dashboards/canary-overview.json
+      - dashboards/my-api-golden-signals.json
