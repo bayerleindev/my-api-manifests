@@ -6,11 +6,22 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 
 ```text
 .
+├── .github
+│   └── workflows
+│       └── grafana-dashboards.yml
 ├── argocd
-│   └── application.yaml
+│   ├── application.yaml
+│   └── monitoring
+│       ├── README.md
+│       ├── application.yaml
+│       ├── values.yaml
+│       └── grafana
+│           ├── dashboards
+│           ├── generate-kustomization.sh
+│           └── kustomization.yaml
 └── k8s
-    ├── kustomization.yaml
-    └── rollout.yaml
+│   ├── kustomization.yaml
+│   └── rollout.yaml
 ```
 
 O Rollout usa NGINX para dividir o tráfego nos pesos 5%, 10%, 50% e 100%. Cada etapa possui promoção manual.
@@ -56,3 +67,7 @@ Altere `spec.template.spec.containers[].image` em `k8s/rollout.yaml`, faça comm
 ```bash
 argocd app sync my-api
 ```
+
+## Monitoring
+
+O diretório [`argocd/monitoring`](argocd/monitoring/README.md) instala o `kube-prometheus-stack` pelo Argo CD e provisiona dashboards JSON no Grafana por GitOps.
