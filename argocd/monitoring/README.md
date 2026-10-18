@@ -92,3 +92,18 @@ kubectl kustomize argocd/monitoring/grafana
 Use nomes de arquivo simples, em minúsculas e sem espaços. Não edite dashboards provisionados diretamente na interface: `allowUiUpdates` está desabilitado e o Git permanece como fonte de verdade.
 
 O `configMapGenerator` agrupa os JSONs em um ConfigMap, cujo limite total é aproximadamente 1 MiB. Quando o conjunto crescer, divida os dashboards entre mais de um `configMapGenerator`.
+
+## Métricas da my-api
+
+Os manifests da aplicação criam o Service `my-api-metrics` no namespace `default` e um `ServiceMonitor` no namespace `monitoring`. O Prometheus consulta `/actuator/prometheus` a cada 15 segundos.
+
+Confirme o endpoint descoberto em **Status > Targets** no Prometheus:
+
+```bash
+kubectl port-forward \
+  --namespace monitoring \
+  service/kube-prometheus-stack-prometheus \
+  9090:9090
+```
+
+Depois acesse `http://localhost:9090/targets` e procure por `serviceMonitor/monitoring/my-api`.

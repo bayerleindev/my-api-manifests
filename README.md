@@ -20,11 +20,14 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │           ├── generate-kustomization.sh
 │           └── kustomization.yaml
 └── k8s
-│   ├── kustomization.yaml
-│   └── rollout.yaml
+    ├── kustomization.yaml
+    ├── monitoring.yaml
+    └── rollout.yaml
 ```
 
 O Rollout usa NGINX para dividir o tráfego nos pesos 5%, 10%, 50% e 100%. Cada etapa possui promoção manual.
+
+O manifesto `k8s/monitoring.yaml` cria um Service dedicado às métricas da API e um `ServiceMonitor` para o Prometheus do `kube-prometheus-stack`. Instale a stack de monitoring antes de sincronizar esse recurso, pois o CRD `ServiceMonitor` precisa existir no cluster.
 
 ## Pré-requisitos
 
