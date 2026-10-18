@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: my-api
-          image: gbcamargo/system-info-api:7b3cf3454888bef6c13adda0b058808904d2afec
+          image: gbcamargo/system-info-api:0d14173d1d3fdc16904261fd235fd2df72f31c12
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
