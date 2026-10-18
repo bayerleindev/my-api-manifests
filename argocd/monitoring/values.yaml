@@ -10,6 +10,20 @@ grafana:
       provider:
         allowUiUpdates: false
 
+# Os componentes do control plane do Kind expõem estas métricas apenas no
+# loopback do nó, portanto não são alcançáveis pelo Prometheus em um Pod.
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
 prometheus:
   prometheusSpec:
     retention: 2d

@@ -8,6 +8,7 @@ metadata:
 spec:
   selector:
     app: my-api
+    monitoring: enabled
   ports:
     - name: http
       port: 8080

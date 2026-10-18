@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: my-api
+        monitoring: enabled
     spec:
       containers:
         - name: my-api

@@ -97,6 +97,10 @@ O `configMapGenerator` agrupa os JSONs em um ConfigMap, cujo limite total é apr
 
 Os manifests da aplicação criam o Service `my-api-metrics` no namespace `default` e um `ServiceMonitor` no namespace `monitoring`. O Prometheus consulta `/actuator/prometheus` a cada 15 segundos.
 
+O Service seleciona somente Pods com `monitoring: enabled`. Essa marca existe nas revisões instrumentadas e impede que uma versão antiga, sem `/actuator/prometheus`, apareça como target indisponível durante um rollout.
+
+Os monitores de `kube-controller-manager`, `kube-scheduler`, `etcd` e `kube-proxy` estão desabilitados neste laboratório. No Kind, esses componentes publicam métricas apenas no loopback do nó e não podem ser alcançados pelo Prometheus executado como Pod.
+
 Confirme o endpoint descoberto em **Status > Targets** no Prometheus:
 
 ```bash
