@@ -1,6 +1,6 @@
 # my-api manifests
 
-Manifests GitOps da `my-api`, gerenciados pelo Argo CD e executados pelo Argo Rollouts.
+Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerenciados pelo Argo CD e executados pelo Argo Rollouts.
 
 ## Estrutura
 
@@ -39,6 +39,8 @@ A sincronização é manual para permitir experimentos locais sem `selfHeal` sob
 ```bash
 argocd app sync my-api
 ```
+
+A aplicação do Argo CD acompanha a branch `main` deste repositório e renderiza a pasta `k8s` com Kustomize.
 
 ## Acompanhar e promover
 
