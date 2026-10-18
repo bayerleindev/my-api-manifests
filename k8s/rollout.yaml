@@ -1,0 +1,103 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: my-api
+spec:
+  replicas: 4
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: my-api
+  template:
+    metadata:
+      labels:
+        app: my-api
+    spec:
+      containers:
+        - name: my-api
+          image: system-info-api:blue
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  strategy:
+    canary:
+      stableService: my-api-stable
+      canaryService: my-api-canary
+      trafficRouting:
+        nginx:
+          stableIngress: my-api
+      steps:
+        - setWeight: 5
+        - pause: {}
+        - setWeight: 10
+        - pause: {}
+        - setWeight: 50
+        - pause: {}
+        - setWeight: 100
+        - pause: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-api-stable
+spec:
+  selector:
+    app: my-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-api-canary
+spec:
+  selector:
+    app: my-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-api
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: my-api.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-api-stable
+                port:
+                  name: http
