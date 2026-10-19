@@ -12,6 +12,7 @@ argocd/monitoring/
 └── grafana/
     ├── dashboards/
     │   ├── canary-overview.json
+    │   ├── my-api-k6-daily.json
     │   └── my-api-golden-signals.json
     ├── generate-kustomization.sh
     └── kustomization.yaml
@@ -124,3 +125,14 @@ Micrometer e do Kubernetes para exibir:
 Os endpoints `/actuator/*` são excluídos dos painéis HTTP para que o scrape do
 Prometheus não seja contabilizado como tráfego da aplicação. Use os filtros de
 versão e cor para comparar stable e canary durante um rollout.
+
+## Métricas do k6
+
+O receiver de Prometheus Remote Write está habilitado para receber as métricas
+`k6_*` produzidas pelo teste agendado. A retenção é de 14 dias e o armazenamento
+é efêmero, adequado ao laboratório local.
+
+O dashboard **my-api / k6 Daily Load Test** mostra tráfego, erros, checks,
+latências p90/p95/p99 e virtual users das execuções diárias. A definição do
+teste e as instruções operacionais estão em
+[`load-testing/README.md`](../../load-testing/README.md).

@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-api-k6-script
+data:
+  my-api.js: |
+    import http from 'k6/http';
+    import { check } from 'k6';
+
+    const baseUrl = __ENV.BASE_URL || 'http://ingress-nginx-controller.ingress-nginx.svc.cluster.local';
+    const host = __ENV.HOST_HEADER || 'my-api.local';
+
+    export const options = {
+      scenarios: {
+        daily_load: {
+          executor: 'constant-arrival-rate',
+          rate: 10,
+          timeUnit: '1s',
+          duration: '20m',
+          preAllocatedVUs: 5,
+          maxVUs: 20,
+        },
+      },
+      thresholds: {
+        http_req_failed: ['rate<0.01'],
+        http_req_duration: ['p(95)<500'],
+      },
+      tags: {
+        test_name: 'my-api-daily',
+        target: 'my-api-ingress',
+      },
+    };
+
+    export default function () {
+      const response = http.get(`${baseUrl}/api/system`, {
+        headers: {
+          Host: host,
+        },
+      });
+
+      check(response, {
+        'status is 200': (result) => result.status === 200,
+      });
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-api-k6-testrun
+data:
+  testrun.yaml: |
+    apiVersion: k6.io/v1alpha1
+    kind: TestRun
+    metadata:
+      name: my-api-daily
+      labels:
+        app.kubernetes.io/name: my-api
+        app.kubernetes.io/component: load-test
+    spec:
+      parallelism: 1
+      script:
+        configMap:
+          name: my-api-k6-script
+          file: my-api.js
+      arguments: --out experimental-prometheus-rw
+      runner:
+        env:
+          - name: BASE_URL
+            value: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local
+          - name: HOST_HEADER
+            value: my-api.local
+          - name: K6_PROMETHEUS_RW_SERVER_URL
+            value: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+          - name: K6_PROMETHEUS_RW_TREND_STATS
+            value: p(90),p(95),p(99),avg,min,max
+          - name: K6_PROMETHEUS_RW_STALE_MARKERS
+            value: "true"
+          - name: K6_PROMETHEUS_RW_LABELS
+            value: environment=lab,test_name=my-api-daily,target=my-api-ingress
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

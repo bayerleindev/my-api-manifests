@@ -13,3 +13,4 @@ configMapGenerator:
     files:
       - dashboards/canary-overview.json
       - dashboards/my-api-golden-signals.json
+      - dashboards/my-api-k6-daily.json

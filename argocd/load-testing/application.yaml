@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-api-load-testing
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/bayerleindev/my-api-manifests.git
+    targetRevision: main
+    path: load-testing
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: load-testing
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

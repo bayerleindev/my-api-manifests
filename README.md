@@ -11,6 +11,10 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │       └── grafana-dashboards.yml
 ├── argocd
 │   ├── application.yaml
+│   ├── k6-operator
+│   │   └── application.yaml
+│   ├── load-testing
+│   │   └── application.yaml
 │   └── monitoring
 │       ├── README.md
 │       ├── application.yaml
@@ -19,6 +23,12 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │           ├── dashboards
 │           ├── generate-kustomization.sh
 │           └── kustomization.yaml
+├── load-testing
+│   ├── README.md
+│   ├── cronjob.yaml
+│   ├── kustomization.yaml
+│   ├── rbac.yaml
+│   └── test-definition.yaml
 └── k8s
     ├── analysis-template.yaml
     ├── kustomization.yaml
@@ -80,7 +90,13 @@ Para gerar aproximadamente 10 requisições por segundo durante a análise, na
 raiz do laboratório execute:
 
 ```bash
-INTERVAL_SECONDS=0.1 ./scripts/call-my-api.sh
+./scripts/call-my-api.sh
+```
+
+A taxa pode ser alterada com `REQUESTS_PER_SECOND`, por exemplo:
+
+```bash
+REQUESTS_PER_SECOND=20 ./scripts/call-my-api.sh
 ```
 
 Acompanhe os objetos criados para cada gate:
@@ -105,3 +121,19 @@ argocd app sync my-api
 ## Monitoring
 
 O diretório [`argocd/monitoring`](argocd/monitoring/README.md) instala o `kube-prometheus-stack` pelo Argo CD e provisiona dashboards JSON no Grafana por GitOps.
+
+## Teste de carga diário
+
+O diretório [`load-testing`](load-testing/README.md) instala, por GitOps, um
+teste k6 de 10 requisições por segundo durante 20 minutos. A execução ocorre
+diariamente às 01:00 no fuso `America/Sao_Paulo`, percorre o Ingress real e
+envia os resultados ao Prometheus para o dashboard **my-api / k6 Daily Load
+Test**.
+
+As Applications são separadas porque o Operator precisa instalar o CRD
+`TestRun` antes da sincronização dos recursos de teste:
+
+```bash
+kubectl apply --filename argocd/k6-operator/application.yaml
+kubectl apply --filename argocd/load-testing/application.yaml
+```

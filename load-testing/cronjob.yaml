@@ -1,0 +1,85 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-api-daily
+  labels:
+    app.kubernetes.io/name: my-api
+    app.kubernetes.io/component: load-test-scheduler
+spec:
+  schedule: "0 1 * * *"
+  timeZone: America/Sao_Paulo
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 900
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: my-api
+            app.kubernetes.io/component: load-test-scheduler
+        spec:
+          serviceAccountName: k6-scheduler
+          restartPolicy: Never
+          containers:
+            - name: scheduler
+              image: alpine/k8s:1.36.1
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -ec
+              args:
+                - |
+                  if kubectl get testrun my-api-daily >/dev/null 2>&1; then
+                    current_stage="$(kubectl get testrun my-api-daily --output=jsonpath='{.status.stage}')"
+                    case "$current_stage" in
+                      finished|error)
+                        kubectl delete testrun my-api-daily --wait=true
+                        ;;
+                      *)
+                        echo "TestRun my-api-daily ainda esta no estágio '$current_stage'; a nova execução não será iniciada."
+                        exit 1
+                        ;;
+                    esac
+                  fi
+
+                  kubectl create --filename=/etc/k6/testrun.yaml
+
+                  attempts=0
+                  while [ "$attempts" -lt 174 ]; do
+                    stage="$(kubectl get testrun my-api-daily --output=jsonpath='{.status.stage}' 2>/dev/null || true)"
+                    case "$stage" in
+                      finished)
+                        echo "TestRun my-api-daily concluído."
+                        exit 0
+                        ;;
+                      error)
+                        echo "TestRun my-api-daily terminou com erro."
+                        exit 1
+                        ;;
+                    esac
+
+                    attempts=$((attempts + 1))
+                    sleep 10
+                  done
+
+                  echo "Timeout aguardando o TestRun my-api-daily."
+                  exit 1
+              resources:
+                requests:
+                  cpu: 25m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi
+              volumeMounts:
+                - name: test-run
+                  mountPath: /etc/k6
+                  readOnly: true
+          volumes:
+            - name: test-run
+              configMap:
+                name: my-api-k6-testrun
