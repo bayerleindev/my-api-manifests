@@ -25,6 +25,8 @@ spec:
   namespaceSelector:
     matchNames:
       - default
+  podTargetLabels:
+    - rollouts-pod-template-hash
   selector:
     matchLabels:
       monitoring: my-api

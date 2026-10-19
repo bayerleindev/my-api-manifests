@@ -20,12 +20,25 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │           ├── generate-kustomization.sh
 │           └── kustomization.yaml
 └── k8s
+    ├── analysis-template.yaml
     ├── kustomization.yaml
     ├── monitoring.yaml
     └── rollout.yaml
 ```
 
-O Rollout usa NGINX para dividir o tráfego nos pesos 5%, 10%, 50% e 100%. Cada etapa possui promoção manual.
+O Rollout usa NGINX para dividir o tráfego nos pesos 5%, 10%, 50% e 100%. Cada etapa executa uma análise automática e, se aprovada, aguarda promoção manual.
+
+O `AnalysisTemplate` consulta somente as métricas dos Pods da revisão canary e
+avalia o endpoint `/api/system`. Em cada peso são feitas três medições, com
+intervalo de 30 segundos:
+
+- taxa de respostas 5xx menor que 1%;
+- latência p95 menor que 500 ms;
+- pelo menos 20 requisições do canary na janela de 2 minutos.
+
+Duas violações entre as três medições abortam o rollout. Tráfego insuficiente
+produz um resultado inconclusivo e mantém o rollout pausado. Três erros
+consecutivos ao consultar o Prometheus também abortam o rollout.
 
 O manifesto `k8s/monitoring.yaml` cria um Service dedicado às métricas da API e um `ServiceMonitor` para o Prometheus do `kube-prometheus-stack`. Instale a stack de monitoring antes de sincronizar esse recurso, pois o CRD `ServiceMonitor` precisa existir no cluster.
 
@@ -62,6 +75,24 @@ A aplicação do Argo CD acompanha a branch `main` deste repositório e renderiz
 kubectl argo rollouts get rollout my-api --watch
 kubectl argo rollouts promote my-api
 ```
+
+Para gerar aproximadamente 10 requisições por segundo durante a análise, na
+raiz do laboratório execute:
+
+```bash
+INTERVAL_SECONDS=0.1 ./scripts/call-my-api.sh
+```
+
+Acompanhe os objetos criados para cada gate:
+
+```bash
+kubectl get analysisruns --watch
+kubectl describe analysisrun <nome>
+```
+
+Uma análise aprovada leva o rollout até a pausa manual seguinte. Use `promote`
+para avançar apenas depois de revisar o resultado. Se a análise abortar o
+rollout, corrija ou publique uma nova imagem antes de tentar novamente.
 
 ## Atualizar por GitOps
 

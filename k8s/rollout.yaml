@@ -53,12 +53,40 @@ spec:
           stableIngress: my-api
       steps:
         - setWeight: 5
+        - analysis:
+            templates:
+              - templateName: my-api-canary-health
+            args:
+              - name: latest-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
         - pause: {}
         - setWeight: 10
+        - analysis:
+            templates:
+              - templateName: my-api-canary-health
+            args:
+              - name: latest-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
         - pause: {}
         - setWeight: 50
+        - analysis:
+            templates:
+              - templateName: my-api-canary-health
+            args:
+              - name: latest-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
         - pause: {}
         - setWeight: 100
+        - analysis:
+            templates:
+              - templateName: my-api-canary-health
+            args:
+              - name: latest-hash
+                valueFrom:
+                  podTemplateHashValue: Latest
         - pause: {}
 ---
 apiVersion: v1

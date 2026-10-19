@@ -1,0 +1,101 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: my-api-canary-health
+spec:
+  args:
+    - name: latest-hash
+  metrics:
+    - name: error-rate
+      initialDelay: 30s
+      interval: 30s
+      count: 3
+      failureLimit: 1
+      inconclusiveLimit: 2
+      consecutiveErrorLimit: 2
+      successCondition: len(result) == 1 && result[0] < 0.01
+      failureCondition: len(result) == 1 && result[0] >= 0.01
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          timeout: 10
+          query: |
+            (
+              (
+                sum(
+                  increase(
+                    http_server_requests_seconds_count{
+                      namespace="default",
+                      application="system-info-api",
+                      rollouts_pod_template_hash="{{args.latest-hash}}",
+                      uri="/api/system",
+                      status=~"5.."
+                    }[2m]
+                  )
+                ) or vector(0)
+              )
+              /
+              sum(
+                increase(
+                  http_server_requests_seconds_count{
+                    namespace="default",
+                    application="system-info-api",
+                    rollouts_pod_template_hash="{{args.latest-hash}}",
+                    uri="/api/system"
+                  }[2m]
+                )
+              )
+            )
+            and on()
+            (
+              sum(
+                increase(
+                  http_server_requests_seconds_count{
+                    namespace="default",
+                    application="system-info-api",
+                    rollouts_pod_template_hash="{{args.latest-hash}}",
+                    uri="/api/system"
+                  }[2m]
+                )
+              ) >= 20
+            )
+    - name: latency-p95
+      initialDelay: 30s
+      interval: 30s
+      count: 3
+      failureLimit: 1
+      inconclusiveLimit: 2
+      consecutiveErrorLimit: 2
+      successCondition: len(result) == 1 && result[0] < 0.5
+      failureCondition: len(result) == 1 && result[0] >= 0.5
+      provider:
+        prometheus:
+          address: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+          timeout: 10
+          query: |
+            histogram_quantile(
+              0.95,
+              sum by (le) (
+                rate(
+                  http_server_requests_seconds_bucket{
+                    namespace="default",
+                    application="system-info-api",
+                    rollouts_pod_template_hash="{{args.latest-hash}}",
+                    uri="/api/system"
+                  }[2m]
+                )
+              )
+            )
+            and on()
+            (
+              sum(
+                increase(
+                  http_server_requests_seconds_count{
+                    namespace="default",
+                    application="system-info-api",
+                    rollouts_pod_template_hash="{{args.latest-hash}}",
+                    uri="/api/system"
+                  }[2m]
+                )
+              ) >= 20
+            )
