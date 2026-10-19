@@ -4,7 +4,7 @@ Esta pasta define o teste diário da `my-api` executado pelo k6 Operator.
 
 ## Comportamento
 
-- execução todos os dias às `01:00` no fuso `America/Sao_Paulo`;
+- execução todos os dias às `18:10` no fuso `America/Sao_Paulo`;
 - tolerância de 15 minutos caso o cluster esteja indisponível no horário;
 - uma única execução por vez;
 - 10 requisições por segundo durante 20 minutos;
@@ -19,7 +19,7 @@ teste anterior ainda estiver em andamento, a nova execução falha sem
 interrompê-lo.
 
 Como este laboratório usa Kind, o MacBook e o cluster precisam estar ligados
-às 01:00. Se o cluster voltar depois de 01:15, aquela execução será ignorada.
+às 18:10. Se o cluster voltar depois de 18:25, aquela execução será ignorada.
 
 ## Instalação pelo Argo CD
 
@@ -47,7 +47,7 @@ kubectl get cronjob --namespace load-testing
 
 ## Executar agora
 
-Para validar o fluxo sem esperar até 01:00, crie um Job a partir do CronJob:
+Para validar o fluxo sem esperar até 18:10, crie um Job a partir do CronJob:
 
 ```bash
 kubectl create job \

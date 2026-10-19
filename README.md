@@ -126,7 +126,7 @@ O diretório [`argocd/monitoring`](argocd/monitoring/README.md) instala o `kube-
 
 O diretório [`load-testing`](load-testing/README.md) instala, por GitOps, um
 teste k6 de 10 requisições por segundo durante 20 minutos. A execução ocorre
-diariamente às 01:00 no fuso `America/Sao_Paulo`, percorre o Ingress real e
+diariamente às 18:10 no fuso `America/Sao_Paulo`, percorre o Ingress real e
 envia os resultados ao Prometheus para o dashboard **my-api / k6 Daily Load
 Test**.
 

@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: my-api
     app.kubernetes.io/component: load-test-scheduler
 spec:
-  schedule: "0 1 * * *"
+  schedule: "10 18 * * *"
   timeZone: America/Sao_Paulo
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 900
