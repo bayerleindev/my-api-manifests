@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: team-my-api
+  namespace: argocd
+spec:
+  description: Recursos e aplicações administrados pela equipe my-api
+  sourceRepos:
+    - https://github.com/bayerleindev/my-api-manifests.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: default
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: Service
+    - group: networking.k8s.io
+      kind: Ingress
+    - group: argoproj.io
+      kind: Rollout
+    - group: argoproj.io
+      kind: AnalysisTemplate
+    - group: monitoring.coreos.com
+      kind: ServiceMonitor
+  orphanedResources:
+    warn: true
+  roles:
+    - name: developers
+      description: Visualiza, sincroniza e opera os rollouts da my-api
+      groups:
+        - /argocd/team-my-api/developers
+      policies:
+        - p, proj:team-my-api:developers, projects, get, team-my-api, allow
+        - p, proj:team-my-api:developers, applications, get, team-my-api/*, allow
+        - p, proj:team-my-api:developers, applications, sync, team-my-api/*, allow
+        - p, proj:team-my-api:developers, applications, action/argoproj.io/Rollout/*, team-my-api/*, allow
+        - p, proj:team-my-api:developers, logs, get, team-my-api/*, allow
+    - name: viewers
+      description: Visualiza a my-api e seus logs sem executar alterações
+      groups:
+        - /argocd/team-my-api/viewers
+      policies:
+        - p, proj:team-my-api:viewers, projects, get, team-my-api, allow
+        - p, proj:team-my-api:viewers, applications, get, team-my-api/*, allow
+        - p, proj:team-my-api:viewers, logs, get, team-my-api/*, allow
+

@@ -23,14 +23,16 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │   │   └── application.yaml
 │   ├── load-testing
 │   │   └── application.yaml
-│   └── monitoring
-│       ├── README.md
-│       ├── application.yaml
-│       ├── values.yaml
-│       └── grafana
-│           ├── dashboards
-│           ├── generate-kustomization.sh
-│           └── kustomization.yaml
+│   ├── monitoring
+│   │   ├── README.md
+│   │   ├── application.yaml
+│   │   ├── values.yaml
+│   │   └── grafana
+│   │       ├── dashboards
+│   │       ├── generate-kustomization.sh
+│   │       └── kustomization.yaml
+│   └── projects
+│       └── team-my-api.yaml
 ├── load-testing
 │   ├── README.md
 │   ├── cronjob.yaml
@@ -76,8 +78,14 @@ kind load docker-image system-info-api:blue --name rollouts-lab
 ## Cadastrar no Argo CD
 
 ```bash
+kubectl apply --filename argocd/projects/team-my-api.yaml
 kubectl apply --filename argocd/application.yaml
 ```
+
+A Application `my-api` pertence ao AppProject `team-my-api`. Os grupos OIDC
+`/argocd/team-my-api/developers` e `/argocd/team-my-api/viewers` recebem acesso
+somente aos recursos desse projeto. As Applications de plataforma permanecem
+no projeto `default` e não são exibidas para esses grupos.
 
 A sincronização é manual para permitir experimentos locais sem `selfHeal` sobrescrever mudanças feitas com `set image`.
 

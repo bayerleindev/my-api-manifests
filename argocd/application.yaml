@@ -4,7 +4,7 @@ metadata:
   name: my-api
   namespace: argocd
 spec:
-  project: default
+  project: team-my-api
   source:
     repoURL: https://github.com/bayerleindev/my-api-manifests.git
     targetRevision: main
