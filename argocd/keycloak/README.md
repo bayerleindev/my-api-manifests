@@ -41,22 +41,24 @@ kubectl get pods --namespace keycloak --watch
 
 ## Acessar
 
-Adicione ao `/etc/hosts`, caso o nome ainda não resolva localmente:
-
-```text
-127.0.0.1 keycloak.local
-```
-
-Abra <http://keycloak.local/admin/> e entre com o usuário armazenado no Secret
-`keycloak-admin`.
-
-Também é possível acessar sem alterar o `/etc/hosts`:
+Neste cluster Kind, as portas HTTP/HTTPS do Ingress Controller não estão
+publicadas no host. Use o port-forward:
 
 ```bash
 kubectl port-forward --namespace keycloak service/keycloak 8081:8080
 ```
 
-Nesse caso, abra <http://localhost:8081/admin/>.
+Abra <http://localhost:8081/admin/>.
+
+O manifesto também cria o host `keycloak.local` no Ingress. Para usá-lo,
+publique a porta do Ingress Controller no host e adicione ao `/etc/hosts`:
+
+```text
+127.0.0.1 keycloak.local
+```
+
+Então abra <http://keycloak.local/admin/>. Em ambos os casos, entre com o
+usuário armazenado no Secret `keycloak-admin`.
 
 ## Próximo passo: SSO do Argo CD
 
