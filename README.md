@@ -12,7 +12,13 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 ├── argocd
 │   ├── application.yaml
 │   ├── keycloak
-│   │   └── application.yaml
+│   │   ├── README.md
+│   │   ├── application.yaml
+│   │   └── manifests
+│   │       ├── ingress.yaml
+│   │       ├── keycloak.yaml
+│   │       ├── kustomization.yaml
+│   │       └── postgres.yaml
 │   ├── k6-operator
 │   │   └── application.yaml
 │   ├── load-testing
@@ -31,12 +37,6 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │   ├── kustomization.yaml
 │   ├── rbac.yaml
 │   └── test-definition.yaml
-├── keycloak
-│   ├── README.md
-│   ├── ingress.yaml
-│   ├── keycloak.yaml
-│   ├── kustomization.yaml
-│   └── postgres.yaml
 └── k8s
     ├── analysis-template.yaml
     ├── kustomization.yaml
@@ -132,7 +132,7 @@ O diretório [`argocd/monitoring`](argocd/monitoring/README.md) instala o `kube-
 
 ## Keycloak
 
-O diretório [`keycloak`](keycloak/README.md) instala o Keycloak e um PostgreSQL
+O diretório [`argocd/keycloak`](argocd/keycloak/README.md) instala o Keycloak e um PostgreSQL
 persistente no namespace `keycloak`. O componente é gerenciado pelo Argo CD,
 mas as credenciais são criadas como Secrets diretamente no cluster e não são
 versionadas no Git.

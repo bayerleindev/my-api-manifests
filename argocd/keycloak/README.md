@@ -1,8 +1,8 @@
 # Keycloak no lab
 
 Esta pasta instala o Keycloak `26.8.1` e um PostgreSQL persistente no namespace
-`keycloak`. A instalação é gerenciada pela Application
-`argocd/keycloak/application.yaml`.
+`keycloak`. A instalação é gerenciada por `application.yaml`, que sincroniza os
+recursos da subpasta `manifests`.
 
 O desenho foi adaptado do
 [Quickstart oficial do Keycloak](https://www.keycloak.org/getting-started/getting-started-kube).

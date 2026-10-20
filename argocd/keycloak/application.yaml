@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/bayerleindev/my-api-manifests.git
     targetRevision: main
-    path: keycloak
+    path: argocd/keycloak/manifests
   destination:
     server: https://kubernetes.default.svc
     namespace: keycloak
