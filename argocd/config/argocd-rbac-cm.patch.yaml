@@ -1,0 +1,5 @@
+data:
+  scopes: '[groups]'
+  policy.csv: |
+    g, /argocd/platform-admins, role:admin
+

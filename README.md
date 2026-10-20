@@ -11,6 +11,11 @@ Manifests GitOps da [`my-api`](https://github.com/bayerleindev/my-api), gerencia
 │       └── grafana-dashboards.yml
 ├── argocd
 │   ├── application.yaml
+│   ├── config
+│   │   ├── README.md
+│   │   ├── apply.sh
+│   │   ├── argocd-cm.patch.yaml
+│   │   └── argocd-rbac-cm.patch.yaml
 │   ├── keycloak
 │   │   ├── README.md
 │   │   ├── application.yaml
@@ -86,6 +91,10 @@ A Application `my-api` pertence ao AppProject `team-my-api`. Os grupos OIDC
 `/argocd/team-my-api/developers` e `/argocd/team-my-api/viewers` recebem acesso
 somente aos recursos desse projeto. As Applications de plataforma permanecem
 no projeto `default` e não são exibidas para esses grupos.
+
+A configuração OIDC e o mapeamento global
+`/argocd/platform-admins -> role:admin` estão versionados em
+[`argocd/config`](argocd/config/README.md).
 
 A sincronização é manual para permitir experimentos locais sem `selfHeal` sobrescrever mudanças feitas com `set image`.
 

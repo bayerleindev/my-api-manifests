@@ -1,0 +1,10 @@
+data:
+  url: https://localhost:8080
+  oidc.config: |
+    name: Keycloak
+    issuer: http://host.docker.internal:8081/realms/canary-lab
+    clientID: argocd
+    enablePKCEAuthentication: true
+    refreshTokenThreshold: 2m
+    requestedScopes: ["openid", "profile", "email", "groups", "offline_access"]
+
